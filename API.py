@@ -588,4 +588,167 @@ def get_dieta_by_id(id):
 
 
 
+
+
+
+
+# TREINO   TREINO   TREINO   TREINO   TREINO
+# TREINO   TREINO   TREINO   TREINO   TREINO
+
+@app.route("/api/treino", methods=["GET"])
+def get_all_treino():
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM T_VB_TREINO ORDER BY 1 ASC")
+        treinos = cursor.fetchall()
+
+        if len(treinos) == 0:
+            return jsonify({"message": "Nenhum treino encontrado!"}), 404
+
+        treinos_json = []
+        for treino in treinos:
+            treino_dict = {
+                "id": treino[0],
+                "nome": treino[1],
+                "descricao": treino[2],
+            }
+            treinos_json.append(treino_dict)
+
+        return jsonify(treinos_json), 200
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
+
+
+@app.route("/api/treino/<int:id>", methods=["GET"])
+def get_treino_by_id(id):
+    try:
+        cursor = conn.cursor()
+        cursor.execute(f"SELECT * FROM T_VB_TREINO WHERE ID_TREINO = {id}")
+        treino = cursor.fetchone()
+
+        if treino is None:
+            return jsonify({"message": "Treino não encontrado!"}), 404
+        
+        treino_dict = {
+            "id": treino[0],
+            "nome": treino[1],
+            "descricao": treino[2],
+        }
+
+        return jsonify(treino_dict), 200
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
+
+
+
+
+
+
+
+
+# TIPO TREINO   TIPO TREINO   TIPO TREINO   TIPO TREINO   TIPO TREINO
+# TIPO TREINO   TIPO TREINO   TIPO TREINO   TIPO TREINO   TIPO TREINO
+
+@app.route("/api/tipo-treino", methods=["GET"])
+def get_all_tipo_treino():
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM T_VB_TP_TREINO ORDER BY 1 ASC")
+        tipo_treinos = cursor.fetchall()
+
+        if len(tipo_treinos) == 0:
+            return jsonify({"message": "Nenhum tipo de treino encontrado!"}), 404
+        
+        tipo_treinos_json = []
+        for tipo_treino in tipo_treinos:
+            tipo_treino_dict = {
+                "id": tipo_treino[0],
+                "nome": tipo_treino[1],
+                "descricao": tipo_treino[2],
+            }
+            tipo_treinos_json.append(tipo_treino_dict)
+
+        return jsonify(tipo_treinos_json), 200
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
+
+
+@app.route("/api/tipo-treino/<int:id>", methods=["GET"])
+def get_tipo_treino_by_id(id):
+    try:
+        cursor = conn.cursor()
+        cursor.execute(f"SELECT * FROM T_VB_TP_TREINO WHERE ID_TP_TREINO = {id}")
+        tipo_treino = cursor.fetchone()
+
+        if tipo_treino is None:
+            return jsonify({"message": "Tipo de treino não encontrado!"}), 404
+        
+        tipo_treino_dict = {
+            "id": tipo_treino[0],
+            "nome": tipo_treino[1],
+            "descricao": tipo_treino[2],
+        }
+
+        return jsonify(tipo_treino_dict), 200
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
+
+
+
+
+
+
+
+
+
+# EXERCICIOS  EXERCICIOS   EXERCICIOS   EXERCICIOS   EXERCICIOS
+# EXERCICIOS  EXERCICIOS   EXERCICIOS   EXERCICIOS   EXERCICIOS
+
+@app.route("/api/exercicio", methods=["GET"])
+def get_all_exercicio():
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM T_VB_EXERC ORDER BY 1 ASC")
+        exercicios = cursor.fetchall()
+
+        if len(exercicios) == 0:
+            return jsonify({"message": "Nenhum exercicio encontrado!"}), 404
+        
+        exercicios_json = []
+        for exercicio in exercicios:
+            exercicio_dict = {
+                "id": exercicio[0],
+                "nome": exercicio[1],
+                "descricao": exercicio[2],
+            }
+            exercicios_json.append(exercicio_dict)
+
+        return jsonify(exercicios_json), 200
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
+
+
+@app.route("/api/exercicio/<int:id>", methods=["GET"])
+def get_exercicio_by_id(id):
+    try:
+        cursor = conn.cursor()
+        cursor.execute(f"SELECT * FROM T_VB_EXERC WHERE ID_EXERCICIO = {id}")
+        exercicio = cursor.fetchone()
+
+        if exercicio is None:
+            return jsonify({"message": "Exercicio não encontrado!"}), 404
+        
+        exercicio_dict = {
+            "id": exercicio[0],
+            "nome": exercicio[1],
+            "descricao": exercicio[2],
+        }
+
+        return jsonify(exercicio_dict), 200
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
+
+
+
+
 app.run(debug=True)
