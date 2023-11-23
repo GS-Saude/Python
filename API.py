@@ -1,6 +1,7 @@
 import oracledb
 from flask import Flask, jsonify, request
 import json
+from datetime import datetime
 
 conn = oracledb.connect(user="rm551763", password="fiap23", dsn="oracle.fiap.com.br/orcl")
 app = Flask(__name__)
@@ -216,10 +217,10 @@ def get_all_objetivo():
         objetivos_json = []
         for objetivo in objetivos:
             objetivo_dict = {
-                "id_objetivo": objetivo[0],
-                "nm_objetivo": objetivo[1],
-                "peso_objetivo": objetivo[2],
-                "tempo_objetivo": objetivo[3],
+                "id": objetivo[0],
+                "nome": objetivo[1],
+                "tempo": objetivo[2].strftime('%d/%m/%Y'),
+                "peso": objetivo[3],
             }
             objetivos_json.append(objetivo_dict)
 
@@ -240,8 +241,8 @@ def get_objetivo_by_id(id):
         objetivo_dict = {
             "id": objetivo[0],
             "nome": objetivo[1],
-            "peso": objetivo[2],
-            "tempo": objetivo[3],
+            "tempo": objetivo[2].strftime('%d/%m/%Y'),
+            "peso": objetivo[3],
         }
 
         return jsonify(objetivo_dict), 200
@@ -680,6 +681,46 @@ def get_tipo_treino_by_id(id):
     except Exception as e:
         return jsonify({"message": str(e)}), 500
 
+@app.route("/api/tipo-treino/treino/<int:id>", methods=["GET"])
+def get_tipo_treino_by_treino(id):
+    try:
+        cursor = conn.cursor()
+        cursor.execute(f"""
+            SELECT 
+                TP.ID_TP_TREINO, 
+                TP.NM_TP_TREINO, 
+                TP.DS_TP_TREINO,
+                T.ID_TREINO, 
+                T.NM_TREINO, 
+                T.DS_TREINO
+            FROM T_VB_TP_TREINO TP
+            INNER JOIN T_VB_TREINO T ON T.ID_TREINO = TP.ID_TREINO
+            WHERE TP.ID_TREINO = {id}
+            ORDER BY 1 ASC
+        """)
+        tipo_treinos = cursor.fetchall()
+
+        if len(tipo_treinos) == 0:
+            return jsonify({"message": "Nenhum tipo de treino encontrado!"}), 404
+        
+        tipo_treinos_json = []
+        for tipo_treino in tipo_treinos:
+            treino_dict = { 
+                "id_tipo_treino": tipo_treino[0],
+                "nome_tipo_treino": tipo_treino[1],
+                "descricao_tipo_treino": tipo_treino[2],
+                "treino": {
+                    "id_treino": tipo_treino[3],
+                    "nome_treino": tipo_treino[4],
+                    "descricao_treino": tipo_treino[5],
+                },
+            }
+            tipo_treinos_json.append(treino_dict)
+        
+        return jsonify(tipo_treinos_json), 200
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
+
 
 
 
@@ -729,7 +770,36 @@ def get_exercicio_by_id(id):
         return jsonify({"message": str(e)}), 500
 
 
+@app.route("/api/exercicio/tipo-treino/<int:id>", methods=["GET"])
+def get_exercicio_by_tipo_treino(id):
+    try:
+        cursor = conn.cursor()
+        cursor.execute(f"""
+            SELECT E.ID_EXERCICIO, E.NM_EXERCICIO, E.SERIES_EXERCICIO, E.REPETICOES_EXERCICIO, E.TEMPO_DESCANSO_EXERCICIO
+            FROM T_VB_EXERC E
+            INNER JOIN T_VB_TP_TREINO TP ON TP.ID_TP_TREINO = E.ID_TP_TREINO
+            WHERE TP.ID_TP_TREINO = {id}
+            ORDER BY 1 ASC
+        """)
+        exercicios = cursor.fetchall()
 
+        if len(exercicios) == 0:
+            return jsonify({"message": "Nenhum exercicio encontrado!"}), 404
+        
+        exercicios_json = []
+        for exercicio in exercicios:
+            exercicio_dict = {
+                "id": exercicio[0],
+                "nome": exercicio[1],
+                "series": exercicio[2],
+                "repeticoes": exercicio[3],
+                "tempo_descanso": exercicio[4],
+            }
+            exercicios_json.append(exercicio_dict)
+        
+        return jsonify(exercicios_json), 200
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
 
 
 

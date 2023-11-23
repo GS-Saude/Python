@@ -148,12 +148,10 @@ def cadastro():
             objetivoSend = {"nome": objetivo, "peso": peso, "tempo": data_tempo}
             responseObjetivo = requests.post('http://127.0.0.1:5000/api/objetivo', json=objetivoSend)
             responseObjetivoJson = responseObjetivo.json()
-            print("\n\nJSON", responseObjetivoJson, "\n\n")
 
             medidaSend = {"cintura": 0, "torax": 0, "braco_direito": 0, "braco_esquerdo": 0, "coxa_direita": 0, "coxa_esquerda": 0, "panturrilha_direita": 0, "panturrilha_esquerda": 0, "altura": altura, "peso": peso}
             responseMedida = requests.post('http://127.0.0.1:5000/api/medida', json=medidaSend)
             responseMedidaJson = responseMedida.json()
-            print("\n\nJSON", responseMedidaJson, "\n\n")
 
             usuarioSend = {
                 "id_medida": responseMedidaJson['medida']['id'],
@@ -168,14 +166,12 @@ def cadastro():
                 "idade_cliente": idade,
                 "metabolismo_cliente": metabolismo
             }
-            print("\n\nJSON", usuarioSend, "\n\n")
-
             responseCliente = requests.post('http://127.0.0.1:5000/api/cliente', json=usuarioSend)
             
             if responseCliente.status_code == 201:
                 responseClienteJson = responseCliente.json()
                 print("\nCadastro realizado com sucesso!\n")
-                print("JSON", responseClienteJson)
+                inicio()
             else:
                 print(f"Erro: Status Code Cliente {responseCliente.status_code}.")
                 print("Erro no cadastro: ", responseCliente.text)
@@ -190,7 +186,7 @@ def cadastro():
 def login():
     print("\n\n===ENTRANDO NA PÁGINA DE LOGIN===\n")
     while(True):
-        print("Deseja fazer login ? \n[1] - Sim \n[2] - Não")
+        print("\nDeseja fazer login ? \n[1] - Sim \n[2] - Não")
         opcao = int(input("Escolha uma opção: "))
 
         if opcao == 1:
@@ -217,24 +213,136 @@ def login():
 
 def perfil(usuario):
     print("\n\n===ENTRANDO NA PÁGINA DE PERFIL===\n")
-    print("O que você deseja fazer? \n[1] - Alterar Dados \n[2] - Alterar Medidas \n[3] - Alterar Objetivo \n[4] - Alterar Treino \n[5] - Alterar Dieta \n[6] - Sair")
-    opcao = int(input("Escolha uma opção: "))
-    if opcao == 1:
-        print("\n\n===ENTRANDO NA PÁGINA DE ALTERAÇÃO DE DADOS===\n")
-        print("O que você deseja alterar? \n[1] - Nome \n[2] - Email \n[3] - Senha \n[4] - Idade \n[5] - Sexo \n[6] - Voltar")
-        opcao = int(input("Escolha uma opção: "))
-        if opcao == 1:
-            nome = input("Digite seu nome: ")
-            usuario['nm_cliente'] = nome
+
+    print("Nome: ", usuario['nm_cliente'])
+    print("Email: ", usuario['email_cliente'])
+    print("Idade: ", usuario['idade_cliente'])
+    print("Sexo: ", usuario['genero_cliente'])
+    print("Senha: ", usuario['senha_cliente'])
+
+    response_objetivo = requests.get('http://127.0.0.1:5000/api/objetivo/' + str(usuario['id_objetivo']))
+    response_objetivo_json = response_objetivo.json()
+    print("\nObjetivo: ", response_objetivo_json['nome'])
+    print("Meta de Peso: ", response_objetivo_json['peso'])
+    print("Meta de Tempo: ", response_objetivo_json['tempo'])
+
+    response_medida = requests.get('http://127.0.0.1:5000/api/medida/' + str(usuario['id_medida']))
+    response_medida_json = response_medida.json()
+    print("\nPeso: ", response_medida_json['peso'])
+    print("Altura: ", response_medida_json['altura'])
+    print("Metabolismo: ", usuario['metabolismo_cliente'])
+
+    response_biotipo = requests.get('http://127.0.0.1:5000/api/biotipo/' + str(usuario['id_biotipo']))
+    response_biotipo_json = response_biotipo.json()
+    print("Biotipo: ", response_biotipo_json['nome'])
+
+    response_treino = requests.get('http://127.0.0.1:5000/api/treino/' + str(usuario['id_treino']))
+    response_treino_json = response_treino.json()
+    print("\nTreino: ", response_treino_json['nome'])
+
+    response_dieta = requests.get('http://127.0.0.1:5000/api/dieta/' + str(usuario['id_dieta']))
+    response_dieta_json = response_dieta.json()
+    print("\nDieta: ", response_dieta_json['nome'])
+
+    opcao_acao = int(input("\n\nDESEJA REALIZAR QUE AÇÃO EM SEU PERFIL: \n[1] - Acessar Treino \n[2] - Acessar Dieta \n[3] - Alterar Dados \n[4] - Sair \n> "))
+
+    if opcao_acao == 1:
+        print("\n\n===ENTRANDO NA PÁGINA DE TREINO===\n\n")
+        print("Treino: ", response_treino_json['nome'].upper())
+        print("Descrição: ", response_treino_json['descricao'])
+
+        response_tipo_treino = requests.get('http://127.0.0.1:5000/api/tipo-treino/treino/' + str(usuario['id_treino']))
+        response_tipo_treino_json = response_tipo_treino.json()
+
+        for tipo_treino in response_tipo_treino_json:
+            print(f"\n[{tipo_treino['id_tipo_treino']}] - Tipo de Treino: ", tipo_treino['nome_tipo_treino'])
+            print("      Descrição: ", tipo_treino['descricao_tipo_treino'])
+
+        tipo_treino_escolhido = int(input("Escolha um tipo de treino:"))
+
+        response_exercicios = requests.get('http://127.0.0.1:5000/api/exercicio/tipo-treino/' + str(tipo_treino_escolhido))
+        response_exercicios_json = response_exercicios.json()
+
+        for exercicio in response_exercicios_json:
+            print(f"\nExercício: ", exercicio['nome'])
+            print("Repetições: ", exercicio['repeticoes'])
+            print("Séries: ", exercicio['series'])
+            print("Tempo de Descanso: ", exercicio['tempo_descanso'] , " minutos")
+        
+        voltar = int(input("\n\nVoltar para: \n[1] - Perfil \n[2] - Menu Principal \n> "))
+        if voltar == 1:
+            perfil(usuario)
+        elif voltar == 2:
+            inicio()
+            
+
+    if opcao_acao == 2:
+        print("\n\n===ENTRANDO NA PÁGINA DE DIETA===\n\n")
+        print("Dieta: ", response_dieta_json['nome'])
+        print("Descrição: ", response_dieta_json['descricao'])
+
+    if opcao_acao == 3:
+        while True:
+            print("\n\n===ENTRANDO NA PÁGINA DE ALTERAÇÃO DE DADOS===")
+            print("O que você deseja alterar? \n[1] - Nome \n[2] - Email \n[3] - Senha \n[4] - Idade \n[5] - Sexo \n[6] - Voltar")
+            opcao = input("Escolha uma opção: ")
+
+            if int(opcao) not in range(1, 6):
+                print("Opção inválida. Tente novamente.")
+                continue
+
+            opcao = int(opcao)
+
+            if opcao == 6: 
+                inicio()
+
+            if opcao == 1:
+                novo_valor = input("Digite o novo nome: ")
+                usuario['nm_cliente'] = novo_valor
+            elif opcao == 2:
+                while(True):
+                    novo_valor = input("Digite o novo email: ")
+                    respostaEmail = requests.get('http://127.0.0.1:5000/api/cliente/' + novo_valor)
+                    if respostaEmail.status_code == 200:
+                        print("\nEmail já cadastrado!\n")
+                    else:
+                        break
+                usuario['email_cliente'] = novo_valor
+            elif opcao == 3:
+                novo_valor = input("Digite a nova senha: ")
+                usuario['senha_cliente'] = novo_valor
+            elif opcao == 4:
+                novo_valor = input("Digite a nova idade: ")
+                usuario['idade_cliente'] = int(novo_valor)
+            elif opcao == 5:
+                while(True):
+                    print("Escolha seu sexo: \n1 - Masculino \n2 - Feminino")
+                    opcao = int(input("Escolha uma opção: "))
+                    if opcao == 1:
+                        novo_valor = "Masculino"
+                        break
+                    elif opcao == 2:
+                        novo_valor = "Feminino"
+                        break
+                    else:
+                        print("\nOpção inválida!\n")
+                usuario['genero_cliente'] = novo_valor
+
+            print("Usuario para atualizar: ", usuario)
+            return
             response = requests.put('http://127.0.0.1:5000/api/cliente', json=usuario)
+
             if response.status_code == 200:
                 responseJson = response.json()
-                print("\nNome alterado com sucesso!\n")
+                print("\nDados alterados com sucesso!\n")
                 print("JSON", responseJson)
                 perfil(responseJson)
             else:
-                print("\nErro ao alterar nome!\n")
+                print("\nErro ao alterar dados!\n")
 
+    if opcao_acao == 4:
+        print("\n\n===SAINDO DO PERFIL DO USUÁRIO===")
+        inicio()
 
 
 
