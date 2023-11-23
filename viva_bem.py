@@ -296,7 +296,6 @@ def perfil(usuario):
             inicio()
 
 
-
     if opcao_acao == 3:
         while True:
             print("\n\n===ENTRANDO NA PÁGINA DE ALTERAÇÃO DE DADOS===")
@@ -313,17 +312,17 @@ def perfil(usuario):
                 inicio()
 
             if opcao == 1:
-                novo_valor = input("Digite o novo nome: ")
+                print("\n\nNome atual: ", usuario['nm_cliente'])
+                novo_valor = input("\nDigite o novo nome: ")
                 usuario['nm_cliente'] = novo_valor
             elif opcao == 2:
                 while(True):
-                    novo_valor = input("Digite o novo email: ")
-                    respostaEmail = requests.put('http://127.0.0.1:5000/api/cliente/' + novo_valor)
+                    novo_valor = input("\nDigite o novo email: ")
+                    respostaEmail = requests.get('http://127.0.0.1:5000/api/cliente/' + novo_valor)
                     if respostaEmail.status_code == 200:
                         print("\nEmail já cadastrado!\n")
                     else:
                         break
-                usuario['email_cliente'] = novo_valor
             elif opcao == 3:
                 novo_valor = input("Digite a nova senha: ")
                 usuario['senha_cliente'] = novo_valor
@@ -344,17 +343,20 @@ def perfil(usuario):
                         print("\nOpção inválida!\n")
                 usuario['genero_cliente'] = novo_valor
 
-            print("Usuario para atualizar: ", usuario)
-            return
-            response = requests.put('http://127.0.0.1:5000/api/cliente', json=usuario)
+            decisao_atualizar = int(input("\n\nDeseja atualizar mais algum dado? \n[1] - Sim \n[2] - Não \n> "))
+            if decisao_atualizar == 2:
+                break
 
-            if response.status_code == 200:
-                responseJson = response.json()
-                print("\nDados alterados com sucesso!\n")
-                print("JSON", responseJson)
-                perfil(responseJson)
-            else:
-                print("\nErro ao alterar dados!\n")
+        id_cliente = usuario.get('id_cliente')
+        usuario.pop('id_cliente', None)
+        response = requests.put('http://127.0.0.1:5000/api/cliente/' + str(id_cliente), json=usuario)
+
+        if response.status_code == 200:
+            responseJson = response.json()
+            print("\n\nDados alterados com sucesso!\n\n")
+            perfil(responseJson['cliente'])
+        else:
+            print("\nErro ao alterar dados!\n")
 
     if opcao_acao == 4:
         print("\n\n===SAINDO DO PERFIL DO USUÁRIO===")

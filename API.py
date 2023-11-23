@@ -121,8 +121,6 @@ def login_cliente():
             "genero_cliente": cliente[9],
             "idade_cliente": cliente[10],
             "metabolismo_cliente": cliente[11],
-            "dt_cadastro": cliente[12].strftime('%Y-%m-%d %H:%M:%S'),
-            "nm_usuario": cliente[13]
         }
         return jsonify(cliente_dict), 200
     except Exception as e:
@@ -187,8 +185,6 @@ def criar_cliente():
         "genero_cliente": cliente[9],
         "idade_cliente": cliente[10],
         "metabolismo_cliente": cliente[11],
-        "dt_cadastro": cliente[12].strftime('%Y-%m-%d %H:%M:%S'),
-        "nm_usuario": cliente[13]
     }
 
     return jsonify({"message": "Cliente criado com sucesso!", "cliente": cliente_dict}), 201
@@ -234,8 +230,6 @@ def atualizar_cliente(id):
             "genero_cliente": cliente[9],
             "idade_cliente": cliente[10],
             "metabolismo_cliente": cliente[11],
-            "dt_cadastro": cliente[12].strftime('%Y-%m-%d %H:%M:%S'),
-            "nm_usuario": cliente[13]
         }
 
         return jsonify({ "message": "Cliente atualizado com sucesso", "cliente": cliente_dict }), 200
