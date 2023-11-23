@@ -28,8 +28,6 @@ def descobrir_biotipo():
     
 
 
-
-
 def cadastro():
     print("\n\n===ENTRANDO NA PÁGINA DE CADASTRO===\n")
     nome = input("Digite seu nome: ")
@@ -150,36 +148,37 @@ def cadastro():
             objetivoSend = {"nome": objetivo, "peso": peso, "tempo": data_tempo}
             responseObjetivo = requests.post('http://127.0.0.1:5000/api/objetivo', json=objetivoSend)
             responseObjetivoJson = responseObjetivo.json()
+            print("\n\nJSON", responseObjetivoJson, "\n\n")
 
             medidaSend = {"cintura": 0, "torax": 0, "braco_direito": 0, "braco_esquerdo": 0, "coxa_direita": 0, "coxa_esquerda": 0, "panturrilha_direita": 0, "panturrilha_esquerda": 0, "altura": altura, "peso": peso}
             responseMedida = requests.post('http://127.0.0.1:5000/api/medida', json=medidaSend)
             responseMedidaJson = responseMedida.json()
+            print("\n\nJSON", responseMedidaJson, "\n\n")
 
-            usuario = {
-                "dt_cadastro": data_tempo,
-                "email_cliente": email,
-                "genero_cliente": sexo, 
-                "nm_usuario": nome, 
-                "id_biotipo": biotipo,
-                "idade_cliente": idade,
-                "id_dieta": 1 if objetivo == "Perder Gordura" else 2,
+            usuarioSend = {
                 "id_medida": responseMedidaJson['medida']['id'],
                 "id_objetivo": responseObjetivoJson['objetivo']['id'],
+                "id_biotipo": 1 if biotipo == "Ectomorfo" else 2 if biotipo == "Mesomorfo" else 3,
+                "id_dieta": 1 if objetivo == "Perder Gordura" else 2,
                 "id_treino": 1 if treino == "Treino Iniciante" else 2 if treino == "Treino Intermediário" else 3,
-                "idade_cliente": idade,
-                "metabolismo_cliente": metabolismo,
+                "email_cliente": email,
+                "senha_cliente": senha,
                 "nm_cliente": nome,
-                "senha_cliente": senha
+                "genero_cliente": sexo,
+                "idade_cliente": idade,
+                "metabolismo_cliente": metabolismo
             }
-            
-            responseCliente = requests.post('http://127.0.0.1:5000/api/cliente', json=usuario)
-            if responseCliente.status_code == 200:
-                responseClienteJson = responseCliente.json()
-            else:
-                print(f"Erro: Status code {responseCliente.status_code}.")
+            print("\n\nJSON", usuarioSend, "\n\n")
 
-            print("JSON", responseClienteJson)
-            print("\nCadastro realizado com sucesso!\n")
+            responseCliente = requests.post('http://127.0.0.1:5000/api/cliente', json=usuarioSend)
+            
+            if responseCliente.status_code == 201:
+                responseClienteJson = responseCliente.json()
+                print("\nCadastro realizado com sucesso!\n")
+                print("JSON", responseClienteJson)
+            else:
+                print(f"Erro: Status Code Cliente {responseCliente.status_code}.")
+                print("Erro no cadastro: ", responseCliente.text)
         except Exception as e:
             print("Erro no cadastro: ", e)
     elif opcao == 2:
@@ -190,15 +189,51 @@ def cadastro():
 
 def login():
     print("\n\n===ENTRANDO NA PÁGINA DE LOGIN===\n")
-    print("Digite seu email: ")
-    email = input()
-    print("Digite sua senha: ")
-    senha = input()
-    usuario = { "email_cliente": email, "senha_cliente": senha }
-    response = requests.post('http://127.0.0.1:5000/api/cliente/login', json=usuario)
-    return response.json()
+    while(True):
+        print("Deseja fazer login ? \n[1] - Sim \n[2] - Não")
+        opcao = int(input("Escolha uma opção: "))
+
+        if opcao == 1:
+            email = input("Digite seu email: ")
+            senha = input("Digite sua senha: ")
+            usuario = { "email_cliente": email, "senha_cliente": senha }
+            
+            if(email == "" or senha == ""):
+                print("\nEmail ou Senha Incompletos!\n")
+            else:
+                response = requests.post('http://127.0.0.1:5000/api/cliente/login', json=usuario)
+                if response.status_code == 200:
+                    responseJson = response.json()
+                    print("\nLogin realizado com sucesso!\n")
+                    print("JSON", responseJson)
+                    return responseJson
+                else:
+                    print("\nEmail ou senha inválidos!\n")
+        elif opcao == 2:
+            inicio()
+        else:
+            print("\nOpção inválida!\n")
 
 
+def perfil(usuario):
+    print("\n\n===ENTRANDO NA PÁGINA DE PERFIL===\n")
+    print("O que você deseja fazer? \n[1] - Alterar Dados \n[2] - Alterar Medidas \n[3] - Alterar Objetivo \n[4] - Alterar Treino \n[5] - Alterar Dieta \n[6] - Sair")
+    opcao = int(input("Escolha uma opção: "))
+    if opcao == 1:
+        print("\n\n===ENTRANDO NA PÁGINA DE ALTERAÇÃO DE DADOS===\n")
+        print("O que você deseja alterar? \n[1] - Nome \n[2] - Email \n[3] - Senha \n[4] - Idade \n[5] - Sexo \n[6] - Voltar")
+        opcao = int(input("Escolha uma opção: "))
+        if opcao == 1:
+            nome = input("Digite seu nome: ")
+            usuario['nm_cliente'] = nome
+            response = requests.put('http://127.0.0.1:5000/api/cliente', json=usuario)
+            if response.status_code == 200:
+                responseJson = response.json()
+                print("\nNome alterado com sucesso!\n")
+                print("JSON", responseJson)
+                perfil(responseJson)
+            else:
+                print("\nErro ao alterar nome!\n")
 
 
 
@@ -206,7 +241,7 @@ def login():
 
 
 def inicio():
-    print("Bem vindo ao Viva Bem!")
+    print("\n\nBem vindo ao Viva Bem!")
     print("O que você deseja fazer?")
     print("1 - Cadastrar")
     print("2 - Login")
@@ -217,11 +252,10 @@ def inicio():
         cadastro()
     elif opcao == 2:
         usuario = login()
-        print("Bem Vindo ", usuario.nm_usuario)
+        print("Bem Vindo ", usuario['nm_cliente'].upper())
+        perfil(usuario)
     elif opcao == 3:
         print("Obrigado por usar o Viva Bem!")
-
-
 
 
 inicio()

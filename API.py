@@ -137,6 +137,7 @@ def login_cliente():
 def criar_cliente():
     data = request.get_json()
     cursor = conn.cursor()
+    print(data)
 
     cursor.execute(
         f"""INSERT INTO T_VB_CLIENTE 
