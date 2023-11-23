@@ -204,6 +204,272 @@ def login():
                 continue
 
 
+def editar_perfil(usuario):
+    while(True):
+        opcao_perfil = int(input(("\n\nQuais dados você deseja alterar? \n[1] - Nome \n[2] - Email \n[3] - Senha \n[4] - Idade \n[5] - Sexo \n[6] - Voltar \nEscolha uma opção: ")))
+
+        if opcao_perfil not in range(1, 6):
+            print("Opção inválida. Tente novamente.")
+            continue
+
+        if opcao_perfil == 6: 
+            inicio()
+
+        if opcao_perfil == 1:
+            print("\n\nNome atual: ", usuario['nm_cliente'])
+            novo_valor = input("\nDigite o novo nome: ")
+            usuario['nm_cliente'] = novo_valor
+        elif opcao_perfil == 2:
+            print("\n\nEmail atual: ", usuario['email_cliente'])
+            while(True):
+                novo_valor = input("\nDigite o novo email: ")
+                respostaEmail = requests.get('http://127.0.0.1:5000/api/cliente/' + novo_valor)
+                if respostaEmail.status_code == 200:
+                    print("\nEmail já cadastrado!\n")
+                else:
+                    break
+        elif opcao_perfil == 3:
+            print("\n\nSenha atual: ", usuario['senha_cliente'])
+            novo_valor = input("\nDigite a nova senha: ")
+            usuario['senha_cliente'] = novo_valor
+        elif opcao_perfil == 4:
+            print("\n\nIdade atual: ", usuario['idade_cliente'])
+            novo_valor = input("\nDigite a nova idade: ")
+            usuario['idade_cliente'] = int(novo_valor)
+        elif opcao_perfil == 5:
+            print("\n\nSexo atual: ", usuario['genero_cliente'])
+            while(True):
+                print("\nEscolha seu sexo: \n1 - Masculino \n2 - Feminino")
+                opcao_sexo = int(input("Escolha uma opção: "))
+                if opcao_sexo == 1:
+                    novo_valor = "Masculino"
+                    break
+                elif opcao_sexo == 2:
+                    novo_valor = "Feminino"
+                    break
+                else:
+                    print("\nOpção inválida!\n")
+            usuario['genero_cliente'] = novo_valor
+
+        decisao_atualizar = int(input("\n\nDeseja atualizar mais algum dado? \n[1] - Sim \n[2] - Não \n> "))
+        if decisao_atualizar == 2:
+            break
+
+    id_cliente = usuario.get('id_cliente')
+    usuario.pop('id_cliente', None)
+    response = requests.put('http://127.0.0.1:5000/api/cliente/' + str(id_cliente), json=usuario)
+
+    if response.status_code == 200:
+        responseJson = response.json()
+        print("\n\Cliente Atualizado com Sucesso!\n\n")
+        perfil(responseJson['cliente'])
+    else:
+        print("\nErro ao alterar o cliente!\n")
+
+
+def editar_objetivo(response_objetivo_json, usuario):
+    while(True):
+        print("\n\nO que você deseja alterar no seu objetivo? \n[1] - Nome \n[2] - Peso \n[3] - Tempo \n[4] - Voltar\n")
+        opcao_objetivo = int(input("Escolha uma opção: "))
+
+        if opcao_objetivo not in range(1, 4):
+            print("Opção inválida. Tente novamente.")
+            continue
+
+        if opcao_objetivo == 4: 
+            perfil(usuario)
+
+        if opcao_objetivo == 1:
+            print("\n\nNome atual: ", response_objetivo_json['nome'])
+            novo_nome_objetivo = int(input("\nEscolha um novo nome: \n[1] - Perder Gordura \n[2] - Ganhar Músculo \n> "))
+            if novo_nome_objetivo == 1:
+                response_objetivo_json['nome'] = "Perder Gordura"
+            elif novo_nome_objetivo == 2:
+                response_objetivo_json['nome'] = "Ganhar Músculo"
+            else:
+                print("\nOpção inválida!\n")
+                continue
+        elif opcao_objetivo == 2:
+            print("\n\nPeso atual: ", response_objetivo_json['peso'])
+            novo_valor = input("\nDigite o novo peso: ")
+            response_objetivo_json['peso'] = float(novo_valor)
+        elif opcao_objetivo == 3:
+            print("\n\nTempo atual: ", response_objetivo_json['tempo'])
+            while(True):
+                novo_valor = input("\nDigite o novo tempo: (dia/mês/ano) -> ")
+                valido, tempo = validar_data(novo_valor)
+                if valido:
+                    response_objetivo_json['tempo'] = tempo
+                    break
+                else:
+                    print("\nData inválida!\n")
+
+        decisao_atualizar = int(input("\n\nDeseja atualizar mais algum dado? \n[1] - Sim \n[2] - Não \n> "))
+        if decisao_atualizar == 2:
+            break
+
+    id_objetivo = response_objetivo_json.get('id')
+    response_objetivo_json.pop('id', None)
+    print("ID do objetivo: ", id_objetivo)
+    print(response_objetivo_json)
+    response = requests.put('http://127.0.0.1:5000/api/objetivo/' + str(id_objetivo), json=response_objetivo_json)
+
+    if response.status_code == 200:
+        print("\n\Objetivo Atualizado com Sucesso!\n\n")
+        perfil(usuario)
+    else:
+        print("\nErro ao alterar o objetivo!\n")
+
+
+def editar_medida(response_medida_json, usuario):
+    while(True):
+        print("\n\nO que você deseja alterar? \n[1] - Cintura \n[2] - Tórax \n[3] - Braço Direito \n[4] - Braço Esquerdo \n[5] - Coxa Direita \n[6] - Coxa Esquerda \n[7] - Panturrilha Direita \n[8] - Panturrilha Esquerda \n[9] - Altura \n[10] - Peso \n[11] - Voltar\n")
+        opcao_medida = int(input("Escolha uma opção: "))
+
+        if int(opcao_medida) not in range(1, 11):
+            print("Opção inválida. Tente novamente.")
+            continue
+
+        if(opcao_medida == 11):
+            perfil(usuario)
+            
+        if(opcao_medida == 1):
+            print("\n\nCintura atual: ", response_medida_json['cintura'])
+            novo_valor = input("\nDigite a nova medida: ")
+            response_medida_json['cintura'] = float(novo_valor)
+        elif(opcao_medida == 2):
+            print("\n\nTórax atual: ", response_medida_json['torax'])
+            novo_valor = input("\nDigite a nova medida: ")
+            response_medida_json['torax'] = float(novo_valor)
+        elif(opcao_medida == 3):
+            print("\n\nBraço Direito atual: ", response_medida_json['braco_direito'])
+            novo_valor = input("\nDigite a nova medida: ")
+            response_medida_json['braco_direito'] = float(novo_valor)
+        elif(opcao_medida == 4):
+            print("\n\nBraço Esquerdo atual: ", response_medida_json['braco_esquerdo'])
+            novo_valor = input("\nDigite a nova medida: ")
+            response_medida_json['braco_esquerdo'] = float(novo_valor)
+        elif(opcao_medida == 5):
+            print("\n\nCoxa Direita atual: ", response_medida_json['coxa_direita'])
+            novo_valor = input("\nDigite a nova medida: ")
+            response_medida_json['coxa_direita'] = float(novo_valor)
+        elif(opcao_medida == 6):
+            print("\n\nCoxa Esquerda atual: ", response_medida_json['coxa_esquerda'])
+            novo_valor = input("\nDigite a nova medida: ")
+            response_medida_json['coxa_esquerda'] = float(novo_valor)
+        elif(opcao_medida == 7):
+            print("\n\nPanturrilha Direita atual: ", response_medida_json['panturrilha_direita'])
+            novo_valor = input("\nDigite a nova medida: ")
+            response_medida_json['panturrilha_direita'] = float(novo_valor)
+        elif(opcao_medida == 8):
+            print("\n\nPanturrilha Esquerda atual: ", response_medida_json['panturrilha_esquerda'])
+            novo_valor = input("\nDigite a nova medida: ")
+            response_medida_json['panturrilha_esquerda'] = float(novo_valor)
+        elif(opcao_medida == 9):
+            print("\n\nAltura atual: ", response_medida_json['altura'])
+            novo_valor = input("\nDigite a nova medida: ")
+            response_medida_json['altura'] = float(novo_valor)
+        elif(opcao_medida == 10):
+            print("\n\nPeso atual: ", response_medida_json['peso'])
+            novo_valor = input("\nDigite a nova medida: ")
+            response_medida_json['peso'] = float(novo_valor)
+        
+        decisao_atualizar = int(input("\n\nDeseja atualizar mais algum dado? \n[1] - Sim \n[2] - Não \n> "))
+        if decisao_atualizar == 2:
+            break
+
+    id_medida = response_medida_json.get('id')
+    response_medida_json.pop('id', None)
+    response = requests.put('http://127.0.0.1:5000/api/medida/' + str(id_medida), json=response_medida_json)
+
+    if response.status_code == 200:
+        print("\n\Medida Atualizada com Sucesso!\n\n")
+        perfil(usuario)
+    else:
+        print("\nErro ao alterar a medida!\n")
+
+
+def editar_dieta(response_dieta_json, usuario):
+    while(True):
+        print("\n\nO que você deseja alterar? \n[1] - Dieta \n[2] - Voltar\n")
+        opcao_dieta = int(input("Escolha uma opção: "))
+
+        if opcao_dieta not in range(1, 3):
+            print("Opção inválida. Tente novamente.")
+            continue
+
+        if(opcao_dieta == 1):
+            print("\n\nDieta atual: ", response_dieta_json['nome'])
+            novo_valor = int(input("\nEscolha uma nova dieta: \n[1] - Dieta de Emagrecimento \n[2] - Dieta de Ganho de Massa \n> "))
+            if novo_valor == 1:
+                usuario['id_dieta'] = 1
+            elif novo_valor == 2:
+                usuario['id_dieta'] = 2
+            else:
+                print("\nOpção inválida!\n")
+                continue
+
+        decisao_atualizar = int(input("\n\nDeseja atualizar mais algum dado? \n[1] - Sim \n[2] - Não \n> "))
+        if decisao_atualizar == 2:
+            break
+
+    id_cliente = usuario.get('id_cliente')
+    usuario.pop('id_cliente', None)
+    response = requests.put('http://127.0.0.1:5000/api/cliente/' + str(id_cliente), json=usuario)
+
+    if response.status_code == 200:
+        responseJson = response.json()
+        print("\n\Dieta Atualizada com Sucesso!\n\n")
+        perfil(responseJson['cliente'])
+    else:
+        print("\nErro ao alterar a dieta!\n")
+
+
+def editar_treino(response_treino_json, usuario):
+    while(True):
+        print("\n\nO que você deseja alterar? \n[1] - Treino \n[2] - Voltar\n")
+        opcao_treino = int(input("Escolha uma opção: "))
+
+        if opcao_treino not in range(1, 3):
+            print("Opção inválida. Tente novamente.")
+            continue
+
+        if(opcao_treino == 1):
+            print("\n\nTreino atual: ", response_treino_json['nome'])
+            novo_valor = int(input("\nEscolha um novo treino: \n[1] - Treino Iniciante \n[2] - Treino Intermediário \n[3] - Treino Avançado \n> "))
+            if novo_valor == 1:
+                usuario['id_treino'] = 1
+            elif novo_valor == 2:
+                usuario['id_treino'] = 2
+            elif novo_valor == 3:
+                usuario['id_treino'] = 3
+            else:
+                print("\nOpção inválida!\n")
+                continue
+
+        decisao_atualizar = int(input("\n\nDeseja atualizar mais algum dado? \n[1] - Sim \n[2] - Não \n> "))
+        if decisao_atualizar == 2:
+            break
+    
+    id_cliente = usuario.get('id_cliente')
+    usuario.pop('id_cliente', None)
+    response = requests.put('http://127.0.0.1:5000/api/cliente/' + str(id_cliente), json=usuario)
+
+    if response.status_code == 200:
+        responseJson = response.json()
+        print("\n\Treino Atualizado com Sucesso!\n\n")
+        perfil(responseJson['cliente'])
+    else:
+        print("\nErro ao alterar o treino!\n")
+
+
+
+
+
+
+
+
+
 def perfil(usuario):
     print("\n\n===ENTRANDO NA PÁGINA DE PERFIL===\n")
 
@@ -251,7 +517,7 @@ def perfil(usuario):
             print(f"\n[{tipo_treino['id_tipo_treino']}] - Tipo de Treino: ", tipo_treino['nome_tipo_treino'])
             print("      Descrição: ", tipo_treino['descricao_tipo_treino'])
 
-        tipo_treino_escolhido = int(input("Escolha um tipo de treino:"))
+        tipo_treino_escolhido = int(input("\n\nEscolha um tipo de treino:"))
 
         response_exercicios = requests.get('http://127.0.0.1:5000/api/exercicio/tipo-treino/' + str(tipo_treino_escolhido))
         response_exercicios_json = response_exercicios.json()
@@ -267,7 +533,6 @@ def perfil(usuario):
             perfil(usuario)
         elif voltar == 2:
             inicio()
-
 
     if opcao_acao == 2:
         print("\n\n=== ENTRANDO NA PÁGINA DE DIETA ===\n\n")
@@ -295,71 +560,29 @@ def perfil(usuario):
         elif voltar == 2:
             inicio()
 
-
     if opcao_acao == 3:
         while True:
             print("\n\n===ENTRANDO NA PÁGINA DE ALTERAÇÃO DE DADOS===")
-            print("O que você deseja alterar? \n[1] - Nome \n[2] - Email \n[3] - Senha \n[4] - Idade \n[5] - Sexo \n[6] - Voltar")
-            opcao = input("Escolha uma opção: ")
+            opcao_update = int(input("\nO que você deseja alterar? \n\n[1] - Perfil \n[2] - Objetivo \n[3] - Medidas \n[4] - Dietas \n[5] - Treinos \n[6] - Sair \n> "))
 
-            if int(opcao) not in range(1, 6):
-                print("Opção inválida. Tente novamente.")
-                continue
-
-            opcao = int(opcao)
-
-            if opcao == 6: 
-                inicio()
-
-            if opcao == 1:
-                print("\n\nNome atual: ", usuario['nm_cliente'])
-                novo_valor = input("\nDigite o novo nome: ")
-                usuario['nm_cliente'] = novo_valor
-            elif opcao == 2:
-                while(True):
-                    novo_valor = input("\nDigite o novo email: ")
-                    respostaEmail = requests.get('http://127.0.0.1:5000/api/cliente/' + novo_valor)
-                    if respostaEmail.status_code == 200:
-                        print("\nEmail já cadastrado!\n")
-                    else:
-                        break
-            elif opcao == 3:
-                novo_valor = input("Digite a nova senha: ")
-                usuario['senha_cliente'] = novo_valor
-            elif opcao == 4:
-                novo_valor = input("Digite a nova idade: ")
-                usuario['idade_cliente'] = int(novo_valor)
-            elif opcao == 5:
-                while(True):
-                    print("Escolha seu sexo: \n1 - Masculino \n2 - Feminino")
-                    opcao = int(input("Escolha uma opção: "))
-                    if opcao == 1:
-                        novo_valor = "Masculino"
-                        break
-                    elif opcao == 2:
-                        novo_valor = "Feminino"
-                        break
-                    else:
-                        print("\nOpção inválida!\n")
-                usuario['genero_cliente'] = novo_valor
-
-            decisao_atualizar = int(input("\n\nDeseja atualizar mais algum dado? \n[1] - Sim \n[2] - Não \n> "))
-            if decisao_atualizar == 2:
+            if opcao_update == 1:
+                editar_perfil(usuario)
                 break
-
-        id_cliente = usuario.get('id_cliente')
-        usuario.pop('id_cliente', None)
-        response = requests.put('http://127.0.0.1:5000/api/cliente/' + str(id_cliente), json=usuario)
-
-        if response.status_code == 200:
-            responseJson = response.json()
-            print("\n\nDados alterados com sucesso!\n\n")
-            perfil(responseJson['cliente'])
-        else:
-            print("\nErro ao alterar dados!\n")
-
+            elif opcao_update == 2:
+                editar_objetivo(response_objetivo_json, usuario)
+                break
+            elif opcao_update == 3:
+                editar_medida(response_medida_json, usuario)
+            elif opcao_update == 4:
+                editar_dieta(response_dieta_json, usuario)
+            elif opcao_update == 5:
+                editar_treino(response_treino_json, usuario)
+            elif opcao_update == 6:
+                perfil(usuario)
+                break
+        
     if opcao_acao == 4:
-        print("\n\n===SAINDO DO PERFIL DO USUÁRIO===")
+        print("\n===SAINDO DO PERFIL DO USUÁRIO===\n\n")
         inicio()
 
 
