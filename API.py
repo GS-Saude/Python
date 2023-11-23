@@ -5,7 +5,8 @@ import json
 conn = oracledb.connect(user="rm551763", password="fiap23", dsn="oracle.fiap.com.br/orcl")
 app = Flask(__name__)
 
-
+# CLIENTE  CLIENTE   CLIENTE   CLIENTE   CLIENTE
+# CLIENTE  CLIENTE   CLIENTE   CLIENTE   CLIENTE
 @app.route("/api/cliente", methods=["GET"])
 def get_all_cliente():
     try:
@@ -40,7 +41,6 @@ def get_all_cliente():
     except Exception as e:
         return jsonify({"message": str(e)}), 500
 
-
 @app.route("/api/cliente/<int:id>", methods=["GET"])
 def get_cliente_by_id(id):
     try:
@@ -72,7 +72,6 @@ def get_cliente_by_id(id):
     except Exception as e:
         return jsonify({"message": str(e)}), 500
 
-
 @app.route("/api/cliente/<string:email>", methods=["GET"])
 def get_cliente_by_email(email):
     try:
@@ -102,7 +101,6 @@ def get_cliente_by_email(email):
         return jsonify(cliente_dict), 200
     except Exception as e:
         return jsonify({"message": str(e)}), 500
-
 
 @app.route("/api/cliente/login", methods=["POST"])
 def login_cliente():
@@ -135,9 +133,6 @@ def login_cliente():
     except Exception as e:
         return jsonify({"message": str(e)}), 500
 
-
-
-# arrumar
 @app.route("/api/cliente", methods=["POST"])
 def criar_cliente():
     data = request.get_json()
@@ -176,17 +171,37 @@ def criar_cliente():
             USER)"""
     )
     conn.commit()
-    return jsonify({"message": "Cliente criado com sucesso!"}), 201
 
+    cursor.execute("SELECT SQ_VB_USUARIO.currval FROM DUAL")
+    id_cliente = cursor.fetchone()[0]
 
+    cursor.execute(f"SELECT * FROM T_VB_CLIENTE WHERE ID_CLIENTE = {id_cliente}")
+    cliente = cursor.fetchone()
 
+    cliente_dict = {
+        "id_cliente": cliente[0],
+        "id_medida": cliente[1],
+        "id_objetivo": cliente[2],
+        "id_biotipo": cliente[3],
+        "id_dieta": cliente[4],
+        "id_treino": cliente[5],
+        "email_cliente": cliente[6],
+        "senha_cliente": cliente[7],
+        "nm_cliente": cliente[8],
+        "genero_cliente": cliente[9],
+        "idade_cliente": cliente[10],
+        "metabolismo_cliente": cliente[11],
+        "dt_cadastro": cliente[12].strftime('%Y-%m-%d %H:%M:%S'),
+        "nm_usuario": cliente[13]
+    }
+
+    return jsonify({"message": "Cliente criado com sucesso!", "cliente": cliente_dict}), 201
 
 
 
 
 # OBJETIVO   OBJETIVO   OBJETIVO   OBJETIVO   OBJETIVO
 # OBJETIVO   OBJETIVO   OBJETIVO   OBJETIVO   OBJETIVO
-
 @app.route("/api/objetivo", methods=["GET"])
 def get_all_objetivo():
     try:
@@ -211,7 +226,6 @@ def get_all_objetivo():
     except Exception as e:
         return jsonify({"message": str(e)}), 500
 
-
 @app.route("/api/objetivo/<int:id>", methods=["GET"])
 def get_objetivo_by_id(id):
     try:
@@ -223,16 +237,15 @@ def get_objetivo_by_id(id):
             return jsonify({"message": "Objetivo não encontrado!"}), 404
         
         objetivo_dict = {
-            "id_objetivo": objetivo[0],
-            "nm_objetivo": objetivo[1],
-            "peso_objetivo": objetivo[2],
-            "tempo_objetivo": objetivo[3],
+            "id": objetivo[0],
+            "nome": objetivo[1],
+            "peso": objetivo[2],
+            "tempo": objetivo[3],
         }
 
         return jsonify(objetivo_dict), 200
     except Exception as e:
         return jsonify({"message": str(e)}), 500
-
 
 @app.route("/api/objetivo", methods=["POST"])
 def criar_objetivo():
@@ -257,13 +270,24 @@ def criar_objetivo():
                 USER)"""
         )
         conn.commit()
-        cursor.execute(f"SELECT * FROM T_VB_OBJETIVO WHERE NM_OBJETIVO = '{data['nome']}' AND PESO_OBJETIVO = {data['peso']} AND TEMPO_OBJETIVO = TO_DATE('{data['tempo']}', 'DD/MM/YYYY')")
+
+        cursor.execute("SELECT SQ_VB_OBJETIVO.currval FROM DUAL")
+        id = cursor.fetchone()[0]
+
+        cursor.execute(f"SELECT * FROM T_VB_OBJETIVO WHERE ID_OBJETIVO = {id}")
         objetivo = cursor.fetchone()
-        return jsonify({ "message": "Objetivo criado com sucesso!", "objetivo": objetivo }), 201
+        
+        objetivo_dict = {
+            "id": objetivo[0],
+            "nome": objetivo[1],
+            "peso": objetivo[2],
+            "tempo": objetivo[3],
+        }
+
+        return jsonify({ "message": "Objetivo criado com sucesso!", "objetivo": objetivo_dict }), 201
     except Exception as e:
         return jsonify({"message": str(e)}), 500
     
-
 @app.route("/api/objetivo/<int:id>", methods=["PUT"])
 def atualizar_objetivo(id):
     try:
@@ -290,14 +314,8 @@ def atualizar_objetivo(id):
 
 
 
-
-
-
-
-
 # MEDIDA   MEDIDA   MEDIDA   MEDIDA   MEDIDA
 # MEDIDA   MEDIDA   MEDIDA   MEDIDA   MEDIDA
-
 @app.route("/api/medida", methods=["GET"])
 def get_all_medida():
     try:
@@ -331,7 +349,6 @@ def get_all_medida():
     except Exception as e:
         return jsonify({"message": str(e)}), 500
 
-
 @app.route("/api/medida/<int:id>", methods=["GET"])
 def get_medida_by_id(id):
     try:
@@ -361,7 +378,6 @@ def get_medida_by_id(id):
         return jsonify(medida_dict), 200
     except Exception as e:
         return jsonify({"message": str(e)}), 500
-
 
 @app.route("/api/medida", methods=["POST"])
 def criar_medida():
@@ -426,7 +442,6 @@ def criar_medida():
     except Exception as e:
         return jsonify({"message": str(e)}), 500
 
-
 @app.route("/api/medida/<int:id>", methods=["PUT"])
 def atualizar_medida(id):
     try:
@@ -477,15 +492,8 @@ def atualizar_medida(id):
 
 
 
-
-
-
-
-
-
 # BIOTIPO   BIOTIPO   BIOTIPO   BIOTIPO   BIOTIPO
 # BIOTIPO   BIOTIPO   BIOTIPO   BIOTIPO   BIOTIPO
-
 @app.route("/api/biotipo", methods=["GET"])
 def get_all_biotipo():
     try:
@@ -508,7 +516,6 @@ def get_all_biotipo():
         return jsonify(biotipos_json), 200
     except Exception as e:
         return jsonify({"message": str(e)}), 500
-
 
 @app.route("/api/biotipo/<int:id>", methods=["GET"])
 def get_biotipo_by_id(id):
@@ -533,14 +540,8 @@ def get_biotipo_by_id(id):
 
 
 
-
-
-
-
 # DIETA   DIETA   DIETA   DIETA   DIETA
 # DIETA   DIETA   DIETA   DIETA   DIETA
-
-
 @app.route("/api/dieta", methods=["GET"])
 def get_all_dieta():
     try:
@@ -564,7 +565,6 @@ def get_all_dieta():
     except Exception as e:
         return jsonify({"message": str(e)}), 500
     
-
 @app.route("/api/dieta/<int:id>", methods=["GET"])
 def get_dieta_by_id(id):
     try:
@@ -587,14 +587,8 @@ def get_dieta_by_id(id):
 
 
 
-
-
-
-
-
 # TREINO   TREINO   TREINO   TREINO   TREINO
 # TREINO   TREINO   TREINO   TREINO   TREINO
-
 @app.route("/api/treino", methods=["GET"])
 def get_all_treino():
     try:
@@ -618,7 +612,6 @@ def get_all_treino():
     except Exception as e:
         return jsonify({"message": str(e)}), 500
 
-
 @app.route("/api/treino/<int:id>", methods=["GET"])
 def get_treino_by_id(id):
     try:
@@ -641,14 +634,8 @@ def get_treino_by_id(id):
 
 
 
-
-
-
-
-
 # TIPO TREINO   TIPO TREINO   TIPO TREINO   TIPO TREINO   TIPO TREINO
 # TIPO TREINO   TIPO TREINO   TIPO TREINO   TIPO TREINO   TIPO TREINO
-
 @app.route("/api/tipo-treino", methods=["GET"])
 def get_all_tipo_treino():
     try:
@@ -671,7 +658,6 @@ def get_all_tipo_treino():
         return jsonify(tipo_treinos_json), 200
     except Exception as e:
         return jsonify({"message": str(e)}), 500
-
 
 @app.route("/api/tipo-treino/<int:id>", methods=["GET"])
 def get_tipo_treino_by_id(id):
@@ -696,14 +682,8 @@ def get_tipo_treino_by_id(id):
 
 
 
-
-
-
-
-
 # EXERCICIOS  EXERCICIOS   EXERCICIOS   EXERCICIOS   EXERCICIOS
 # EXERCICIOS  EXERCICIOS   EXERCICIOS   EXERCICIOS   EXERCICIOS
-
 @app.route("/api/exercicio", methods=["GET"])
 def get_all_exercicio():
     try:
@@ -727,7 +707,6 @@ def get_all_exercicio():
     except Exception as e:
         return jsonify({"message": str(e)}), 500
 
-
 @app.route("/api/exercicio/<int:id>", methods=["GET"])
 def get_exercicio_by_id(id):
     try:
@@ -747,6 +726,8 @@ def get_exercicio_by_id(id):
         return jsonify(exercicio_dict), 200
     except Exception as e:
         return jsonify({"message": str(e)}), 500
+
+
 
 
 
