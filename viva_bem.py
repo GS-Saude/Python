@@ -186,29 +186,22 @@ def cadastro():
 def login():
     print("\n\n===ENTRANDO NA PÁGINA DE LOGIN===\n")
     while(True):
-        print("\nDeseja fazer login ? \n[1] - Sim \n[2] - Não")
-        opcao = int(input("Escolha uma opção: "))
-
-        if opcao == 1:
-            email = input("Digite seu email: ")
-            senha = input("Digite sua senha: ")
-            usuario = { "email_cliente": email, "senha_cliente": senha }
-            
-            if(email == "" or senha == ""):
-                print("\nEmail ou Senha Incompletos!\n")
-            else:
-                response = requests.post('http://127.0.0.1:5000/api/cliente/login', json=usuario)
-                if response.status_code == 200:
-                    responseJson = response.json()
-                    print("\nLogin realizado com sucesso!\n")
-                    print("JSON", responseJson)
-                    return responseJson
-                else:
-                    print("\nEmail ou senha inválidos!\n")
-        elif opcao == 2:
-            inicio()
+        email = input("\nDigite seu email: ")
+        senha = input("Digite sua senha: ")
+        usuario = { "email_cliente": email, "senha_cliente": senha }
+        
+        if(email == "" or senha == ""):
+            print("\nEmail ou Senha Incompletos!\n")
+            continue
         else:
-            print("\nOpção inválida!\n")
+            response = requests.post('http://127.0.0.1:5000/api/cliente/login', json=usuario)
+            if response.status_code == 200:
+                responseJson = response.json()
+                print("\nLogin realizado com sucesso!\n")
+                return responseJson
+            else:
+                print("\nEmail ou senha inválidos!\n")
+                continue
 
 
 def perfil(usuario):
@@ -274,12 +267,35 @@ def perfil(usuario):
             perfil(usuario)
         elif voltar == 2:
             inicio()
-            
+
 
     if opcao_acao == 2:
-        print("\n\n===ENTRANDO NA PÁGINA DE DIETA===\n\n")
+        print("\n\n=== ENTRANDO NA PÁGINA DE DIETA ===\n\n")
         print("Dieta: ", response_dieta_json['nome'])
-        print("Descrição: ", response_dieta_json['descricao'])
+
+        if usuario['id_dieta'] == 1:
+            descricao_dieta = response_dieta_json['descricao']['dieta_emagrecimento']
+        elif usuario['id_dieta'] == 2:
+            descricao_dieta = response_dieta_json['descricao']['dieta_musculo']
+
+        print("\n\n=== EXIBINDO DETALHES DA DIETA ===\n")
+
+        for refeicao, opcoes in descricao_dieta.items():
+            print(f"\n\n{refeicao.upper()}\n")
+            for opcao in opcoes:
+                print(f"Opção: {opcao['opcao']}")
+                print(f"Calorias: {opcao['calorias']}")
+                print(f"Carboidratos: {opcao['carboidratos']}")
+                print(f"Gorduras: {opcao['gorduras']}")
+                print(f"Proteínas: {opcao['proteinas']}\n")
+
+        voltar = int(input("\n\nVoltar para: \n[1] - Perfil \n[2] - Menu Principal \n> "))
+        if voltar == 1:
+            perfil(usuario)
+        elif voltar == 2:
+            inicio()
+
+
 
     if opcao_acao == 3:
         while True:
@@ -302,7 +318,7 @@ def perfil(usuario):
             elif opcao == 2:
                 while(True):
                     novo_valor = input("Digite o novo email: ")
-                    respostaEmail = requests.get('http://127.0.0.1:5000/api/cliente/' + novo_valor)
+                    respostaEmail = requests.put('http://127.0.0.1:5000/api/cliente/' + novo_valor)
                     if respostaEmail.status_code == 200:
                         print("\nEmail já cadastrado!\n")
                     else:
@@ -364,6 +380,9 @@ def inicio():
         perfil(usuario)
     elif opcao == 3:
         print("Obrigado por usar o Viva Bem!")
+    else: 
+        print("Opção inválida!")
+        inicio()
 
 
 inicio()

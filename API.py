@@ -33,8 +33,6 @@ def get_all_cliente():
                 "genero_cliente": cliente[9],
                 "idade_cliente": cliente[10],
                 "metabolismo_cliente": cliente[11],
-                "dt_cadastro": cliente[12].strftime("%Y-%m-%d %H:%M:%S"),
-                "nm_usuario": cliente[13],
             }
             clientes_json.append(cliente_dict)
 
@@ -65,8 +63,6 @@ def get_cliente_by_id(id):
             "genero_cliente": cliente[9],
             "idade_cliente": cliente[10],
             "metabolismo_cliente": cliente[11],
-            "dt_cadastro": cliente[12].strftime('%Y-%m-%d %H:%M:%S'),
-            "nm_usuario": cliente[13]
         }
 
         return jsonify(cliente_dict), 200
@@ -96,8 +92,6 @@ def get_cliente_by_email(email):
             "genero_cliente": cliente[9],
             "idade_cliente": cliente[10],
             "metabolismo_cliente": cliente[11],
-            "dt_cadastro": cliente[12].strftime('%Y-%m-%d %H:%M:%S'),
-            "nm_usuario": cliente[13]
         }
         return jsonify(cliente_dict), 200
     except Exception as e:
@@ -199,6 +193,54 @@ def criar_cliente():
 
     return jsonify({"message": "Cliente criado com sucesso!", "cliente": cliente_dict}), 201
 
+@app.route("/api/cliente/<int:id>", methods=["PUT"])
+def atualizar_cliente(id):
+    try:
+        data = request.get_json()
+        cursor = conn.cursor()
+
+        cursor.execute(
+            f"""UPDATE T_VB_CLIENTE SET 
+            ID_MEDIDA = {data['id_medida']}, 
+            ID_OBJETIVO = {data['id_objetivo']}, 
+            ID_BIOTIPO = {data['id_biotipo']}, 
+            ID_DIETA = {data['id_dieta']}, 
+            ID_TREINO = {data['id_treino']}, 
+            EMAIL_CLIENTE = '{data['email_cliente']}', 
+            SENHA_CLIENTE = '{data['senha_cliente']}', 
+            NM_CLIENTE = '{data['nm_cliente']}', 
+            GENERO_CLIENTE = '{data['genero_cliente']}', 
+            IDADE_CLIENTE = {data['idade_cliente']}, 
+            METABOLISMO_CLIENTE = {data['metabolismo_cliente']},
+            DT_CADASTRO = SYSDATE,
+            NM_USUARIO = USER
+            WHERE ID_CLIENTE = {id}"""
+        )
+        conn.commit()
+
+        cursor.execute(f"SELECT * FROM T_VB_CLIENTE WHERE ID_CLIENTE = {id}")
+        cliente = cursor.fetchone()
+
+        cliente_dict = {
+            "id_cliente": cliente[0],
+            "id_medida": cliente[1],
+            "id_objetivo": cliente[2],
+            "id_biotipo": cliente[3],
+            "id_dieta": cliente[4],
+            "id_treino": cliente[5],
+            "email_cliente": cliente[6],
+            "senha_cliente": cliente[7],
+            "nm_cliente": cliente[8],
+            "genero_cliente": cliente[9],
+            "idade_cliente": cliente[10],
+            "metabolismo_cliente": cliente[11],
+            "dt_cadastro": cliente[12].strftime('%Y-%m-%d %H:%M:%S'),
+            "nm_usuario": cliente[13]
+        }
+
+        return jsonify({ "message": "Cliente atualizado com sucesso", "cliente": cliente_dict }), 200
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
 
 
 
