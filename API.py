@@ -237,6 +237,17 @@ def atualizar_cliente(id):
         return jsonify({"message": str(e)}), 500
 
 
+@app.route("/api/cliente/<int:id>", methods=["DELETE"])
+def deletar_cliente(id):
+    try:
+        cursor = conn.cursor()
+        cursor.execute(f"DELETE FROM T_VB_CLIENTE WHERE ID_CLIENTE = {id}")
+        conn.commit()
+
+        return jsonify({"message": "Cliente deletado com sucesso!"}), 200
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
+
 
 # OBJETIVO   OBJETIVO   OBJETIVO   OBJETIVO   OBJETIVO
 # OBJETIVO   OBJETIVO   OBJETIVO   OBJETIVO   OBJETIVO

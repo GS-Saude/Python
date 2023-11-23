@@ -463,6 +463,28 @@ def editar_treino(response_treino_json, usuario):
         print("\nErro ao alterar o treino!\n")
 
 
+def remover_perfil(usuario):
+    print("\n\n===ENTRANDO NA PÁGINA DE REMOÇÃO DE PERFIL===\n")
+    print("Nome: ", usuario['nm_cliente'])
+    print("Email: ", usuario['email_cliente'])
+    print("Idade: ", usuario['idade_cliente'])
+    print("Sexo: ", usuario['genero_cliente'])
+    print("Senha: ", usuario['senha_cliente'])
+
+    confirmar = int(input("\n\nDeseja realmente remover seu perfil? \n[1] - Sim \n[2] - Não \n> "))
+
+    if(confirmar == 1):
+        print("\n\n===REMOVENDO PERFIL===\n")
+        responseDelete = requests.delete('http://127.0.0.1:5000/api/cliente/' + str(usuario['id_cliente']))
+        
+        if(responseDelete.status_code == 200):
+            print("\nPerfil deletado com sucesso!\n")
+            inicio()
+    
+    elif(confirmar == 2):
+        print("\n\n===VOLTANDO PARA O PERFIL===\n")
+        perfil(usuario)
+
 
 
 
@@ -503,7 +525,7 @@ def perfil(usuario):
     response_dieta_json = response_dieta.json()
     print("\nDieta: ", response_dieta_json['nome'])
 
-    opcao_acao = int(input("\n\nDESEJA REALIZAR QUE AÇÃO EM SEU PERFIL: \n[1] - Acessar Treino \n[2] - Acessar Dieta \n[3] - Alterar Dados \n[4] - Sair \n> "))
+    opcao_acao = int(input("\n\nDESEJA REALIZAR QUE AÇÃO EM SEU PERFIL: \n[1] - Acessar Treino \n[2] - Acessar Dieta \n[3] - Alterar Dados \n[4] - Deletar Perfil \n[5] - Sair \n> "))
 
     if opcao_acao == 1:
         print("\n\n===ENTRANDO NA PÁGINA DE TREINO===\n\n")
@@ -582,6 +604,9 @@ def perfil(usuario):
                 break
         
     if opcao_acao == 4:
+        remover_perfil(usuario)
+
+    if opcao_acao == 5:
         print("\n===SAINDO DO PERFIL DO USUÁRIO===\n\n")
         inicio()
 
