@@ -1,5 +1,6 @@
 import requests
 from datetime import datetime
+import json
 
 def validar_data(tempo):
     try:
@@ -486,6 +487,25 @@ def remover_perfil(usuario):
         perfil(usuario)
 
 
+def exportar_json_treinos(usuario):
+    print("\n\n===ENTRANDO NA PÁGINA DE EXPORTAÇÃO DE JSON DOS TREINOS===\n")
+
+    exercicios_export_json = []
+
+    response_treino = requests.get('http://127.0.0.1:5000/api/tipo-treino/treino/' + str(usuario['id_treino']))
+    response_treino_json = response_treino.json()
+
+    for tipo_treino in response_treino_json:
+        response_exercicios = requests.get('http://127.0.0.1:5000/api/exercicio/tipo-treino/' + str(tipo_treino['id_tipo_treino']))
+        response_exercicios_json = response_exercicios.json()
+
+        exercicios_export_json.extend(response_exercicios_json)
+
+    with open('exercicios_exportados.json', 'w') as json_file:
+        json.dump(exercicios_export_json, json_file, indent=2)
+
+    print("\n\nExportação concluída. Os exercícios foram exportados para o arquivo exercicios_exportados.json.\n\n")
+    perfil(usuario)
 
 
 
@@ -525,7 +545,7 @@ def perfil(usuario):
     response_dieta_json = response_dieta.json()
     print("\nDieta: ", response_dieta_json['nome'])
 
-    opcao_acao = int(input("\n\nDESEJA REALIZAR QUE AÇÃO EM SEU PERFIL: \n[1] - Acessar Treino \n[2] - Acessar Dieta \n[3] - Alterar Dados \n[4] - Deletar Perfil \n[5] - Sair \n> "))
+    opcao_acao = int(input("\n\nDESEJA REALIZAR QUE AÇÃO EM SEU PERFIL: \n[1] - Acessar Treino \n[2] - Acessar Dieta \n[3] - Alterar Dados \n[4] - Deletar Perfil \n[5] - Exportar JSON dos treinos \n[6] - Sair \n> "))
 
     if opcao_acao == 1:
         print("\n\n===ENTRANDO NA PÁGINA DE TREINO===\n\n")
@@ -607,6 +627,9 @@ def perfil(usuario):
         remover_perfil(usuario)
 
     if opcao_acao == 5:
+        exportar_json_treinos(usuario)
+
+    if opcao_acao == 6:
         print("\n===SAINDO DO PERFIL DO USUÁRIO===\n\n")
         inicio()
 
